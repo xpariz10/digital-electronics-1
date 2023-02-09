@@ -6,7 +6,7 @@ git status
 git commit
 ```
 
-[Youtube] (https://www.youtube.com/watch?v=SkgTxQm9DWM)
+[Youtube](https://www.youtube.com/watch?v=SkgTxQm9DWM)
 
 1. Eat
 2. Study electrical engineering
