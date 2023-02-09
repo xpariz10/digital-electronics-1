@@ -4,13 +4,11 @@
 
 1. Equations of all three versions of logic function f(c,b,a):
 
-   ```
    \begin{align*}
    f_{\textup{ORIG}}(c,b,a) =&~ \overline{b}\cdot a + c\cdot\overline{(b+\overline{a})}\\
    f_{\textup{(N)AND}}(c,b,a) =&\\
    f_{\textup{(N)OR}}(c,b,a) =&\\
    \end{align*}
-   ```
 
    ![Logic function](images/equations.png)
 
