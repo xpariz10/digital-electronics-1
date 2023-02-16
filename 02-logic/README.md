@@ -1,4 +1,4 @@
-# Lab 2: INSERT_YOUR_FIRSTNAME INSERT_YOUR_LASTNAMEE
+# Lab 2: Radim Pařízek
 
 ### 2-bit comparator
 
@@ -20,27 +20,53 @@
 
 1. Listing of VHDL stimulus process from testbench file (`testbench.vhd`) with at least one assert (use BCD codes of your student ID digits as input combinations). Always use syntax highlighting, meaningful comments, and follow VHDL guidelines:
 
-   Last two digits of my student ID: **xxxx??**
+   Last two digits of my student ID: **83 = BCD(1000 0011)**
 
 ```vhdl
-    p_stimulus : process
+     p_stimulus : process
     begin
-        -- Report a note at the beginning of stimulus process
-        report "Stimulus process started" severity note;
+        report "Stimulus process started";
 
-        -- First test case
-        s_b <= "BCD_OF_YOUR_SECOND_LAST_ID_DIGIT"; -- Such as "0101" if ID = xxxx56
-        s_a <= "BCD_OF_YOUR_LAST_ID_DIGIT";        -- Such as "0110" if ID = xxxx56
-        wait for 100 ns;
-        -- Expected output
-        assert ((s_B_greater_A = 'WRITE_CORRECT_VALUE_HERE') and
-                (s_B_equals_A  = 'WRITE_CORRECT_VALUE_HERE') and
-                (s_B_less_A    = 'WRITE_CORRECT_VALUE_HERE'))
-        -- If false, then report an error
-        report "Input combination COMPLETE_THIS_TEXT FAILED" severity error;
+        s_b <= "0000"; s_a <= "0000"; wait for 100 ns;
+        assert ((s_B_greater_A = '0') and
+                (s_B_equals_A  = '1') and
+                (s_B_less_A    = '0'))
+        report "Input combination b=0, a=0 FAILED" severity error;
 
-        -- Report a note at the end of stimulus process
-        report "Stimulus process finished" severity note;
+
+        s_b <= "0001"; s_a <= "1000"; wait for 100 ns;
+        assert ((s_B_greater_A = '0') and
+                (s_B_equals_A  = '0') and
+                (s_B_less_A    = '1'))
+        report "Input combination b=1, a=8 FAILED" severity error;
+        
+        s_b <= "1001"; s_a <= "1001"; wait for 100 ns;
+        assert ((s_B_greater_A = '0') and
+                (s_B_equals_A  = '1') and
+                (s_B_less_A    = '0'))
+        report "Input combination b=9, a=9 FAILED" severity error;
+        
+        
+        
+        --chyba při assertu
+        s_b <= "0011"; s_a <= "1000"; wait for 100 ns;
+        assert ((s_B_greater_A = '1') and
+                (s_B_equals_A  = '0') and
+                (s_B_less_A    = '0'))
+        report "Input combination b=3, a=8 FAILED succesfully" severity error;
+        
+        
+        
+        --test posledních dvou čísel v mém ID - xxx x83
+        s_b <= "1000"; s_a <= "0011"; wait for 100 ns;
+        assert ((s_B_greater_A = '1') and
+                (s_B_equals_A  = '0') and
+                (s_B_less_A    = '0'))
+        report "Input combination b=8, a=3 FAILED" severity error;
+        
+        
+        
+        report "Stimulus process finished";
         wait;
     end process p_stimulus;
 ```
