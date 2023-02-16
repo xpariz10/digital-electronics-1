@@ -53,7 +53,7 @@
         assert ((s_B_greater_A = '1') and
                 (s_B_equals_A  = '0') and
                 (s_B_less_A    = '0'))
-        report "Input combination b=3, a=8 FAILED succesfully" severity error;
+        report "Input combination b=3, a=8 FAILED successfully" severity error;
         
         
         
@@ -73,4 +73,4 @@
 
 2. Link to your public EDA Playground example:
 
-   [https://www.edaplayground.com/...](https://www.edaplayground.com/...)
+   [EDA Playground 4-bit BCD comparator](https://www.edaplayground.com/x/nKeq)
