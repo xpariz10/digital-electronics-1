@@ -12,13 +12,32 @@
 
 ```vhdl
 architecture Behavioral of jk_ff_rst is
+    signal sig_q : std_logic;
+begin
+    --------------------------------------------------------
+    -- p_jk_ff_rst:
+    -- JK type flip-flop with a high-active synchro reset and
+    -- rising-edge clk.
+    -- sig_q = j./sig_q + /k.sig_q
+    --------------------------------------------------------
+    p_jk_ff_rst: process (clk) is
+    begin
+        if rising_edge(clk) then
+            if (j = '0') and (k = '0') then
+                sig_q <= sig_q;     -- No change
+            elsif (j = '0') and (k = '1') then
+                sig_q <= '0';       -- Reset
+            elsif (j = '1') and (k = '0') then
+                sig_q <= '1';       -- Set
+            elsif (j = '1') and (k = '1') then
+                sig_q <= not sig_q; -- Toggle
+            end if;
+        end if;
+    end process p_jk_ff_rst;
 
-    -- WRITE YOUR CODE HERE
-
-    -- Output ports are permanently connected to local signal
     q     <= sig_q;
     q_bar <= not sig_q;
-end architecture Behavioral;
+end architecture behavioral;
 ```
 
 ### Shift register
