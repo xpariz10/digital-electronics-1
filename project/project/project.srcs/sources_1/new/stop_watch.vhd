@@ -23,9 +23,10 @@ entity stopwatch is
         start_i        : in  std_logic;
         pause_i        : in  std_logic;
         min_set        : in  unsigned(4 - 1 downto 0);
-        seconds_h_o    : out std_logic_vector(3 - 1 downto 0);
+        seconds_h_o    : out std_logic_vector(4 - 1 downto 0);
         seconds_l_o    : out std_logic_vector(4 - 1 downto 0);
-        minutes_l_o    : out std_logic_vector(4 - 1 downto 0)
+        minutes_l_o    : out std_logic_vector(4 - 1 downto 0);
+        set_enable     : in  std_logic
     );
 end entity stopwatch;
 
@@ -40,8 +41,10 @@ architecture Behavioral of stopwatch is
     signal s_start : std_logic;
     -- Local counters
 	signal s_cnt2  : unsigned(4 - 1 downto 0);  -- minutes
-    signal s_cnt1  : unsigned(3 - 1 downto 0);  -- tens of Seconds
+    signal s_cnt1  : unsigned(4 - 1 downto 0);  -- tens of Seconds
     signal s_cnt0  : unsigned(4 - 1 downto 0);  -- seconds
+    
+    --signal min     : unsigned(4 - 1 downto 0);
 
 begin
     --------------------------------------------------------------------
@@ -52,7 +55,7 @@ begin
     --s_en <= '1';
    clk_en0 : entity work.clock_enable
        generic map(
-            g_MAX =>1 --100000000        -- 10 ms / (1/100 MHz) = g_MAX
+            g_MAX => 1 --100000000        -- 10 ms / (1/100 MHz) = g_MAX
        )
         port map(
             clk => clk,
@@ -75,43 +78,46 @@ begin
                 s_cnt2 <= (others => '0');
                 s_cnt1 <= (others => '0');
                 s_cnt0 <= (others => '0');
+                --min <= "0011";
                 s_start <= '0';
+            
+            elsif (start_i = '1') then
+                if (s_cnt2 = 0) and (s_cnt1 = 0) and (s_cnt0 = 0) then
+                    s_cnt2 <= min_set;
+                    --s_start <= '1';
+                elsif (s_cnt2 /= 0) and (s_cnt1 /= 0) and (s_cnt0 /= 0) then
+                    s_start <= '1';
+                end if;
+                
             elsif  (s_cnt1 = 0 ) and (s_cnt0 = 0 ) and (s_cnt2 = 0) then
                 s_start <= '0';
-                
-            else
+            
                 --! When pause is pressed, set s_start to '0' to stop counting.
-                if pause_i = '1' then
+            if pause_i = '1' then
                     s_start <= '0';
-                end if;
+            end if;
 
-                if start_i = '1' then
-                    if (s_cnt2 /= 0) and (s_cnt1 /= 0) and (s_cnt0 /= 0) then
-                        s_start <= '1';
-                    elsif (s_cnt2 = 0) and (s_cnt1 = 0) and (s_cnt0 = 0) then
-                        s_cnt2 <= min_set;
-                        s_start <= '1';
-                    end if;
-                end if;
-                
-                
-                if s_start <= '1' then
+            if (s_start <= '1') then
             -- Counting only if start was pressed and pause is inactive
-                s_cnt0 <= s_cnt0 - 1;       -- Increment every 10 ms
-                end if;
+                    s_cnt0 <= s_cnt0 - 1;       -- Increment every 10 ms
+                    
+            end if;
+            
+            s_cnt0 <= s_cnt0 - 1;       -- Increment every 10 ms
+            if (s_cnt0 = 0 ) then
+                        s_cnt1 <= s_cnt1 - 1;  
+                        s_cnt0 <= "1001";
+            end if ;
+                    -- Test tenths of seconds
+                    --- WRITE YOUR CODE HERE
+            if (s_cnt1 = 0 ) and (s_cnt0 = 0 ) then
+                        s_cnt2 <= s_cnt2 - 1;  
+                        s_cnt1 <= "0101";
+            end if ;
                
                 -- Test if sec
                 --- WRITE YOUR CODE HERE
-                if (s_cnt0 = 0 ) then
-                 s_cnt1 <= s_cnt1 - 1;  
-                 s_cnt0 <= "1001";
-                end if ;
-                    -- Test tenths of seconds
-                    --- WRITE YOUR CODE HERE
-                if (s_cnt1 = 0 ) and (s_cnt0 = 0 ) then
-                 s_cnt2 <= s_cnt2 - 1;  
-                 s_cnt1 <= "101";
-                end if ;
+            
                         -- Test seconds
                         --- WRITE YOUR CODE HERE
 

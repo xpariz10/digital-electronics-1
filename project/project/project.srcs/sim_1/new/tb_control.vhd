@@ -99,6 +99,7 @@ begin
 
     report "Stimulus process started";
     
+    
     --sig_set_SW <= '1';
     --sig_train_SW <= '1';
     wait for 100 ns;

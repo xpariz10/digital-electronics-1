@@ -8,12 +8,10 @@ entity ctrl_state is
     clk   		: in    std_logic;                    
     rst   		: in    std_logic;
     --BTNU		: in    std_logic;       pro debounce po uspesne simulaci simulaci
-    --BTNC		: in    std_logic;
     --BTND		: in    std_logic;
     --BTNL		: in    std_logic;
     --BTNR		: in    std_logic;
     BTNU_d		: in    std_logic;
-    BTNC_d		: in    std_logic;
     BTND_d		: in    std_logic;
     BTNL_d		: in    std_logic;
     BTNR_d		: in    std_logic;
@@ -23,9 +21,9 @@ entity ctrl_state is
     reps_SW 	: in    std_logic;
     
     digit_0		: out    std_logic_vector(4 - 1 downto 0);
-    digit_1	 	: out    std_logic_vector(3 - 1 downto 0);
+    digit_1	 	: out    std_logic_vector(4 - 1 downto 0);
     digit_2 	: out    std_logic_vector(4 - 1 downto 0);
-    digit_3 	: out    std_logic_vector(7 - 1 downto 0)    -- 7 bit vektor pro zobrazeni pismena oznaceni stavu
+    digit_3 	: out    std_logic_vector(4 - 1 downto 0)    -- 7 bit vektor pro zobrazeni pismena oznaceni stavu
     );
 end entity ctrl_state;
 
@@ -59,16 +57,17 @@ architecture behavioral of ctrl_state is
   signal sig_last_state 	: t_state;                   -- posledni stav pro prepinani z PAUSE
   
   signal sig_seconds_l  : std_logic_vector(4 - 1 downto 0);
-  signal sig_seconds_h  : std_logic_vector(3 - 1 downto 0);
+  signal sig_seconds_h  : std_logic_vector(4 - 1 downto 0);
   signal sig_minutes_l  : std_logic_vector(4 - 1 downto 0);
+  signal sig_set_enable : std_logic;
   signal sig_start      : std_logic;
   signal sig_pause      : std_logic;
 
-  constant c_SET   		: std_logic_vector(7 - 1 downto 0) := b"0010010"; -- sedmisegmentove hodnoty pro pismena stavu
-  constant c_GO     	: std_logic_vector(7 - 1 downto 0) := b"0000000"; 
-  constant c_PAUSE  	: std_logic_vector(7 - 1 downto 0) := b"0011000";
-  constant c_TRAIN  	: std_logic_vector(7 - 1 downto 0) := b"1110000";
-  constant c_BREAK  	: std_logic_vector(7 - 1 downto 0) := b"1100000";
+  constant c_SET   		: std_logic_vector(4 - 1 downto 0) := b"1011"; -- sedmisegmentove hodnoty pro pismena stavu
+  constant c_GO     	: std_logic_vector(4 - 1 downto 0) := b"1100"; 
+  constant c_PAUSE  	: std_logic_vector(4 - 1 downto 0) := b"1101";
+  constant c_TRAIN  	: std_logic_vector(4 - 1 downto 0) := b"1110";
+  constant c_BREAK  	: std_logic_vector(4 - 1 downto 0) := b"1111";
 
 begin
 
@@ -92,7 +91,8 @@ begin
       seconds_h_o => sig_seconds_h,
       seconds_l_o => sig_seconds_l,
       minutes_l_o => sig_minutes_l,
-      min_set => sig_stopwatch_cnt
+      min_set => sig_stopwatch_cnt,
+      set_enable => sig_set_enable
     );
 
   --s_db_U : entity work.s_debouncing
@@ -157,6 +157,7 @@ begin
             if (set_SW = '1') then
             	sig_state <= SET; -- prechod na nastaveni (SET)
             elsif (BTNU_d = '1') then
+                --sig_set_enable <= '1';
             	sig_stopwatch_cnt <= sig_train_set;  -- nastaveni odpocitavani na delku train
             	sig_start <= '1';                    -- zacatek odpoctu stopwatch
             	sig_state <= TRAIN;                  -- prechod na stav TRAIN
@@ -198,18 +199,20 @@ begin
             end if;
             
           when TRAIN =>
+            --sig_set_enable <= '0';
             if (BTND_d = '1') then        -- prechod na pauzu
                 sig_last_state <= sig_state;
                 sig_pause <= '1';
                 sig_start <= '0';
                 sig_state <= PAUSE;
-            elsif (sig_seconds_l = "0000" and sig_seconds_h = "000" and sig_minutes_l = "0000") then   -- konec odpoctu
+            elsif (sig_seconds_l = "0000" and sig_seconds_h = "0000" and sig_minutes_l = "0000") then   -- konec odpoctu
                 if (sig_num_reps = sig_reps_set) then   -- po dokonceni vsech reps prejde zpet do GO
             	   sig_num_reps <= "0000";
             	   sig_start <= '0';
             	   sig_state <= GO;
             	else
-            	   sig_num_reps <= sig_num_reps + 1;     -- odpocet reps
+            	   sig_num_reps <= sig_num_reps + 1;
+            	   --sig_set_enable <= '1';     -- odpocet reps
             	   sig_stopwatch_cnt <= sig_break_set;   -- zapsani doby pauzy
             	   sig_start <= '1';                     -- odpocet
                    sig_state <= BREAK;                   -- prechod na BREAK
@@ -217,12 +220,14 @@ begin
             end if;
             
           when BREAK =>
+            --sig_set_enable <= '0';
             if (BTND_d = '1') then
                 sig_last_state <= sig_state;   -- ulozeni posledniho stavu
                 sig_pause <= '1';
                 sig_start <= '0';
                 sig_state <= PAUSE;            -- prechod na pauzu
-            elsif (sig_seconds_l = "0000" and sig_seconds_h = "000" and sig_minutes_l = "0000") then -- konec odpoctu a prechod na TRAIN
+            elsif (sig_seconds_l = "0000" and sig_seconds_h = "0000" and sig_minutes_l = "0000") then -- konec odpoctu a prechod na TRAIN
+            	--sig_set_enable <= '1';
             	sig_stopwatch_cnt <= sig_train_set;
             	sig_start <= '1';
                 sig_state <= TRAIN;

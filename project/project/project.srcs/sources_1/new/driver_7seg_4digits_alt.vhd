@@ -49,8 +49,9 @@ entity driver_7seg_4digits_alt is
     clk     : in    std_logic;
     rst     : in    std_logic;
     data0   : in    std_logic_vector(3 downto 0);
-    data1   : in    std_logic_vector(3-1 downto 0);
+    data1   : in    std_logic_vector(3 downto 0);
     data2   : in    std_logic_vector(3 downto 0);
+    data3   : in    std_logic_vector(3 downto 0);
     dp_vect : in    std_logic_vector(3 downto 0);
     
     dp      : out   std_logic;
@@ -102,10 +103,10 @@ begin
 
         case sig_cnt_2bit is
 
-          --when "11" =>
-            --sig_hex <= data3;
-            --dp      <= dp_vect(3);
-            --dig     <= "0111";
+          when "11" =>
+            sig_hex <= data3;
+            dp      <= dp_vect(3);
+            dig     <= "0111";
 
           when "10" =>
             sig_hex <= data2;
