@@ -1,24 +1,3 @@
-----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
--- 
--- Create Date: 03/30/2023 01:54:49 PM
--- Design Name: 
--- Module Name: top - Behavioral
--- Project Name: 
--- Target Devices: 
--- Tool Versions: 
--- Description: 
--- 
--- Dependencies: 
--- 
--- Revision:
--- Revision 0.01 - File Created
--- Additional Comments:
--- 
-----------------------------------------------------------------------------------
-
-
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use ieee.numeric_std.all;
@@ -39,37 +18,28 @@ entity top is
            AN : out STD_LOGIC_VECTOR (7 downto 0);
            BTNC : in STD_LOGIC;  --reset
            BTNU : in STD_LOGIC;  --start
-           BTND : in STD_LOGIC;  --pause
+           BTND : in STD_LOGIC;  --pause/unpause
            BTNL : in STD_LOGIC;  
            BTNR : in STD_LOGIC);
-           --digit_0   : buffer    std_logic_vector(4-1 downto 0);
-           --digit_1   : buffer    std_logic_vector(3-1 downto 0);
-           --digit_2   : buffer    std_logic_vector(4-1 downto 0);
-           --digit_3   : buffer    std_logic_vector(4-1 downto 0));
 end top;
 
-----------------------------------------------------------
--- Architecture body for top level
-----------------------------------------------------------
 
 architecture behavioral of top is
 
-    signal s_seconds_l  : std_logic_vector(4 - 1 downto 0);  -- minutes
-    signal s_seconds_h  : std_logic_vector(4 - 1 downto 0);  -- tens of Seconds
-    signal s_minutes_l  : std_logic_vector(4 - 1 downto 0);
-    signal s_digit      : std_logic_vector(4 - 1 downto 0); 
+    signal digit_0  : std_logic_vector(4 - 1 downto 0);
+    signal digit_1  : std_logic_vector(4 - 1 downto 0);
+    signal digit_2  : std_logic_vector(4 - 1 downto 0);
+    signal digit_3  : std_logic_vector(4 - 1 downto 0); 
 
 begin
-  --------------------------------------------------------
-  -- Instance (copy) of tlc entity
-  --------------------------------------------------------
+  
   driver_7seg_4digits : entity work.driver_7seg_4digits_alt
     port map ( clk     => CLK100MHZ,
                rst     => BTNC,
-               data0   => s_seconds_l,
-               data1   => s_seconds_h,
-               data2   => s_minutes_l,
-               data3   => s_digit,           
+               data0   => digit_0,
+               data1   => digit_1,
+               data2   => digit_2,
+               data3   => digit_3,           
                seg(6) => CA,
                seg(5) => CB,
                seg(4) => CC,
@@ -86,19 +56,20 @@ begin
     port map ( 
             clk         => CLK100MHZ,                    
             rst         => BTNC,
-            BTNU_d      => BTNU,       --pro debounce po uspesne simulaci simulaci   
-            BTND_d	    => BTND,
-            BTNL_d	    => BTNL,
-            BTNR_d	    => BTNR,
+            BTNC_d      => BTNC,
+            BTNU        => BTNU,        
+            BTND	    => BTND,
+            BTNL	    => BTNL,
+            BTNR	    => BTNR,
             set_SW 	    => SW(0), 
             train_SW 	=> SW(15),
             break_SW 	=> SW(14),
             reps_SW 	=> SW(13),
     
-            digit_0		=> s_seconds_l,
-            digit_1	 	=> s_seconds_h,
-            digit_2 	=> s_minutes_l,
-            digit_3 	=> s_digit 
+            digit_0		=> digit_0,
+            digit_1	 	=> digit_1,
+            digit_2 	=> digit_2,
+            digit_3 	=> digit_3 
     );
     
 AN(7 downto 4) <= b"1111";

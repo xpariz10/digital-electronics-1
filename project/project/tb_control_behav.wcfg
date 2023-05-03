@@ -15,10 +15,10 @@
       <Cursor1Time time="30000000fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="141"></NameColumnWidth>
-      <ValueColumnWidth column_width="58"></ValueColumnWidth>
+      <NameColumnWidth column_width="140"></NameColumnWidth>
+      <ValueColumnWidth column_width="63"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="15" />
+   <WVObjectSize size="18" />
    <wvobject fp_name="/tb_control/uut_ctrl_state/clk" type="logic">
       <obj_property name="ElementShortName">clk</obj_property>
       <obj_property name="ObjectShortName">clk</obj_property>
@@ -63,20 +63,32 @@
       <obj_property name="ElementShortName">s_pause</obj_property>
       <obj_property name="ObjectShortName">s_pause</obj_property>
    </wvobject>
+   <wvobject fp_name="/tb_control/uut_ctrl_state/sig_set_enable" type="logic">
+      <obj_property name="ElementShortName">sig_set_enable</obj_property>
+      <obj_property name="ObjectShortName">sig_set_enable</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_control/uut_ctrl_state/sig_end" type="logic">
+      <obj_property name="ElementShortName">sig_end</obj_property>
+      <obj_property name="ObjectShortName">sig_end</obj_property>
+   </wvobject>
    <wvobject fp_name="/tb_control/uut_ctrl_state/stopwatch/min_set" type="array">
       <obj_property name="ElementShortName">min_set[3:0]</obj_property>
       <obj_property name="ObjectShortName">min_set[3:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/tb_control/uut_ctrl_state/stopwatch/cnt_end" type="logic">
-      <obj_property name="ElementShortName">cnt_end</obj_property>
-      <obj_property name="ObjectShortName">cnt_end</obj_property>
+   <wvobject fp_name="/tb_control/uut_ctrl_state/sig_train_set" type="array">
+      <obj_property name="ElementShortName">sig_train_set[3:0]</obj_property>
+      <obj_property name="ObjectShortName">sig_train_set[3:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/tb_control/uut_ctrl_state/sig_stopwatch_cnt" type="array">
-      <obj_property name="ElementShortName">sig_stopwatch_cnt[3:0]</obj_property>
-      <obj_property name="ObjectShortName">sig_stopwatch_cnt[3:0]</obj_property>
+   <wvobject fp_name="/tb_control/uut_ctrl_state/BTND_d" type="logic">
+      <obj_property name="ElementShortName">BTND_d</obj_property>
+      <obj_property name="ObjectShortName">BTND_d</obj_property>
    </wvobject>
-   <wvobject fp_name="/tb_control/uut_ctrl_state/sig_set_enable" type="logic">
-      <obj_property name="ElementShortName">sig_set_enable</obj_property>
-      <obj_property name="ObjectShortName">sig_set_enable</obj_property>
+   <wvobject fp_name="/tb_control/uut_ctrl_state/BTNU_d" type="logic">
+      <obj_property name="ElementShortName">BTNU_d</obj_property>
+      <obj_property name="ObjectShortName">BTNU_d</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_control/uut_ctrl_state/BTNR_d" type="logic">
+      <obj_property name="ElementShortName">BTNR_d</obj_property>
+      <obj_property name="ObjectShortName">BTNR_d</obj_property>
    </wvobject>
 </wave_config>

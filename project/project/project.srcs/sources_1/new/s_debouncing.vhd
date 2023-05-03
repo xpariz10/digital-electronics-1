@@ -2,9 +2,7 @@ library ieee;
 use ieee.std_logic_1164.all;
 
 entity s_debouncing is
-  Generic(
-    clk_f	    : integer := 50_000_000;  --system clock frequency in Hz
-    wait_time   : integer := 120);        --time to wait in ms
+  
   Port(
     clk     : in  std_logic;  
     rst	    : in  std_logic;  
@@ -19,6 +17,9 @@ signal sig_en 		: std_logic;
 begin
     
 clk_enable : entity work.clk_en_db
+      generic map (
+            g_MAX => 5    -- sim 5, board 12000000
+      )        
       port map (
           clk => clk,
           rst => rst,

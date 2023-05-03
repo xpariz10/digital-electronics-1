@@ -3,7 +3,7 @@ library ieee;
 
 
 entity tb_control is
-  -- Entity of testbench is always empty
+  
 end entity tb_control;
 
 
@@ -37,11 +37,11 @@ begin
     port map (
       clk      => sig_clk_100mhz,
       rst      => sig_rst,
-      BTNU_d   => sig_BTNU_d,
+      BTNU   => sig_BTNU_d,
       BTNC_d   => sig_BTNC_d,
-      BTND_d   => sig_BTND_d,
-      BTNL_d   => sig_BTNL_d,
-      BTNR_d   => sig_BTNR_d,
+      BTND     => sig_BTND_d,
+      BTNL   => sig_BTNL_d,
+      BTNR   => sig_BTNR_d,
       set_SW   => sig_set_SW,
       train_SW => sig_train_SW,
       break_SW => sig_break_SW,
@@ -100,9 +100,22 @@ begin
     report "Stimulus process started";
     
     
-    --sig_set_SW <= '1';
-    --sig_train_SW <= '1';
+    sig_set_SW <= '1';
+    sig_train_SW <= '1';
     wait for 200 ns;
+    
+    sig_set_SW <= '1';
+    sig_train_SW <= '1';
+    
+    sig_BTNR_d <= '1';
+    wait for 400 ns;
+    sig_BTNR_d <= '0';
+    wait for 15 ns;
+    
+    sig_train_SW <= '0';
+    sig_set_SW <= '0';
+    wait for 50 ns;
+    
     
     --sig_BTNR_d <= '1';
     --wait for 50 ns;
@@ -129,6 +142,15 @@ begin
     wait for 50 ns;
     sig_BTNU_d <= '0';
     
+    
+    wait for 500 ns;
+    sig_BTND_d <= '1';
+    wait for 50 ns;
+    sig_BTND_d <= '0';
+    wait for 50 ns;
+    sig_BTND_d <= '1';
+    wait for 50 ns;
+    sig_BTND_d <= '0';
     
     report "Stimulus process finished";
     wait;

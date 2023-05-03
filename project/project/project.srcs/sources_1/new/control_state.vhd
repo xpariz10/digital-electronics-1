@@ -7,15 +7,15 @@ entity ctrl_state is
   port (
     clk   		: in    std_logic;                    
     rst   		: in    std_logic;
-    --BTNU		: in    std_logic;       --pro debounce po uspesne simulaci simulaci
-    --BTND		: in    std_logic;
-    --BTNL		: in    std_logic;
-    --BTNR		: in    std_logic;
+    BTNU		: in    std_logic;       --pro debounce po uspesne simulaci simulaci
+    BTND		: in    std_logic;
+    BTNL		: in    std_logic;
+    BTNR		: in    std_logic;
     BTNC_d		: in    std_logic;
-    BTNU_d		: in    std_logic;
-    BTND_d		: in    std_logic;
-    BTNL_d		: in    std_logic;
-    BTNR_d		: in    std_logic;
+    --BTNU_d		: in    std_logic;
+    --BTND_d		: in    std_logic;
+    --BTNL_d		: in    std_logic;
+    --BTNR_d		: in    std_logic;
     set_SW 		: in    std_logic; 
     train_SW 	: in    std_logic;
     break_SW 	: in    std_logic;
@@ -42,19 +42,19 @@ architecture behavioral of ctrl_state is
   signal sig_state		: t_state;
   signal sig_en 		: std_logic;
   
-  signal sig_cnt 		: unsigned(4 downto 0);  -- navic, zbytecne
-  
-  --signal BTNU_d	    : std_logic;    -- signaly pro uz debouncenute buttons
+  signal BTNU_d	    : std_logic;    -- signaly pro uz debouncenute buttons
   --signal BTNC_d	    : std_logic;
-  --signal BTND_d	    : std_logic;
-  --signal BTNL_d	    : std_logic;
-  --signal BTNR_d	    : std_logic;
+  signal BTND_d	    : std_logic;
+  signal BTNL_d	    : std_logic;
+  signal BTNR_d	    : std_logic;
   
   signal sig_num_reps		: unsigned(4 - 1 downto 0);  -- aktualni pocet opakovani/reps
   signal sig_reps_set 		: unsigned(4 - 1 downto 0);  -- nastaveny pocet opakovani/reps
   signal sig_train_set		: unsigned(4 - 1 downto 0);  -- nastavena delka train
   signal sig_break_set 		: unsigned(4 - 1 downto 0);  -- nasatvena delka breaku
-  signal sig_last_state 	: t_state;                   -- posledni stav pro prepinani z PAUSE
+  signal sig_waitset        : unsigned(4 - 1 downto 0);
+  signal sig_waitpause      : unsigned(4 - 1 downto 0);
+  signal sig_last_state 	: t_state;                   -- posledni stav pro prepinani z PAUSE a pro nastavovani delky useku
   
   signal sig_seconds_l     : std_logic_vector(4 - 1 downto 0);
   signal sig_seconds_h     : std_logic_vector(4 - 1 downto 0);
@@ -75,8 +75,7 @@ begin
 
   clk_en0 : entity work.clock_enable
     generic map (
-      -- 250 ms
-      g_MAX => 1
+      g_MAX => 1   --sim 1, board 5000000
       
     )
     port map (
@@ -99,55 +98,47 @@ begin
       cnt_end => sig_end
     );
 
-  --s_db_U : entity work.s_debouncing
-  --  port map (
-  --    clk     => clk,
-  --    rst     => rst,
-  --    button  => BTNU,
-  --    result  => BTNU_d
-  --  );
+  s_db_U : entity work.s_debouncing
+    port map (
+      clk     => clk,
+      rst     => rst,
+      button  => BTNU,
+      result  => BTNU_d
+    );
+ 
+  s_db_D : entity work.s_debouncing
+    port map (
+      clk     => clk,
+      rst     => rst,
+      button  => BTND,
+      result  => BTND_d
+    );
     
-  --s_db_C : entity work.s_debouncing
-    --port map (
-      --clk     => clk,
-      --rst     => rst,
-      --button  => BTNC,
-      --result  => BTNC_d
-    --);
-    
-  --s_db_D : entity work.s_debouncing
-  --  port map (
-  --    clk     => clk,
-  --    rst     => rst,
-  --    button  => BTND,
-  --    result  => BTND_d
-  --  );
-    
-  --s_db_L : entity work.s_debouncing
-  --  port map (
-  --    clk     => clk,
-  --    rst     => rst,
-  --    button  => BTNL,
-  --    result  => BTNL_d
-  --  );
+  s_db_L : entity work.s_debouncing
+    port map (
+      clk     => clk,
+      rst     => rst,
+      button  => BTNL,
+      result  => BTNL_d
+    );
   
-  --s_db_R : entity work.s_debouncing
-  --  port map (
-  --    clk     => clk,
-  --    rst     => rst,
-  --    button  => BTNR,
-  --    result  => BTNR_d
-  --  );
+  s_db_R : entity work.s_debouncing
+    port map (
+      clk     => clk,
+      rst     => rst,
+      button  => BTNR,
+      result  => BTNR_d
+    );
   
     
---000
+
   p_ctrl : process (clk) is
   begin
 
     if (rising_edge(clk)) then
       if (rst = '1') then                  
-        sig_state <= GO;              		
-        sig_cnt   <= (others => '0');
+        sig_state <= GO;
+        sig_waitset <= (others => '0');
         
         sig_reps_set  <= "0010";
         sig_train_set <= "0010";
@@ -163,9 +154,7 @@ begin
             	sig_state <= SET; -- prechod na nastaveni (SET)
             elsif (BTNU_d = '1') then
                 sig_set_enable <= '1';
-            	sig_stopwatch_cnt <= std_logic_vector(sig_train_set);  -- nastaveni odpocitavani na delku train
-            	--sig_start <= '1';                  -- zacatek odpoctu stopwatch
-            	--sig_pause <= '0';   
+            	sig_stopwatch_cnt <= std_logic_vector(sig_train_set);  -- nastaveni odpocitavani na delku train 
             	sig_last_state <= sig_state;              
             	sig_state <= TRAIN;                -- prechod na stav TRAIN
             else 
@@ -173,29 +162,37 @@ begin
             end if;
 
 		  when SET =>
-            if (train_SW = '1' and break_SW = '0' and reps_SW = '0') then   -- pouze kdyz je v HIGH jenom train switch
+		    if (sig_waitset /= "0000") then
+		        sig_waitset <= sig_waitset + 1; 
+            elsif (train_SW = '1' and break_SW /= '1' and reps_SW /= '1') then   -- pouze kdyz je v HIGH jenom train switch
                 if (BTNR_d = '1') then
                     sig_train_set <= sig_train_set + 1;            -- inkrementace po jedne minute
+                    sig_waitset <= sig_waitset + 1;
                 elsif (BTNL_d = '1' and sig_train_set /= 0) then   -- pokud se nerovna nule, je mozna i dekrementace
                 	sig_train_set <= sig_train_set - 1;
+                	sig_waitset <= sig_waitset + 1;
                 else
                 	sig_state <= SET;
 				end if;
                 
-            elsif (train_SW = '0' and break_SW = '1' and reps_SW = '0') then
+            elsif (train_SW /= '1' and break_SW = '1' and reps_SW /= '1') then
             	if (BTNR_d = '1') then
                     sig_break_set <= sig_break_set + 1;
+                    sig_waitset <= sig_waitset + 1;
                 elsif (BTNL_d = '1' and sig_break_set /= 0) then
                 	sig_break_set <= sig_break_set - 1;
+                	sig_waitset <= sig_waitset + 1;
                 else
                 	sig_state <= SET;
 				end if;
                 
-            elsif (train_SW = '0' and break_SW = '0' and reps_SW = '1') then
+            elsif (train_SW /= '1' and break_SW /= '1' and reps_SW = '1') then
             	if (BTNR_d = '1') then
                     sig_reps_set <= sig_reps_set + 1;
+                    sig_waitset <= sig_waitset + 1;
                 elsif (BTNL_d = '1' and sig_reps_set /= 0) then
                 	sig_reps_set <= sig_reps_set - 1;
+                	sig_waitset <= sig_waitset + 1;
                 else
                 	sig_state <= SET;
 				end if;
@@ -207,7 +204,7 @@ begin
             
           when TRAIN =>
             
-            if sig_set_enable = '1' and sig_stopwatch_cnt = std_logic_vector(sig_train_set) then
+            if sig_set_enable = '1' then 
                 sig_set_enable <= '0';
                 sig_start <= '1';                  -- zacatek odpoctu stopwatch
             	sig_pause <= '0';
@@ -222,15 +219,13 @@ begin
                 sig_pause <= '1';
                 sig_state <= PAUSE;
                 
-            elsif (sig_seconds_l = "0000" and sig_seconds_h = "0000" and sig_minutes_l = "0000" and sig_end = '1') then   -- konec odpoctu     
-            --elsif sig_end = '1' then
+            elsif (sig_seconds_l = "0000" and sig_seconds_h = "0000" and sig_minutes_l = "0000" and sig_end = '1') then   -- konec odpoctu
                 if (sig_num_reps = sig_reps_set or sig_reps_set = "0001") then   -- po dokonceni vsech reps prejde zpet do GO
             	   sig_num_reps <= "0000";
             	   sig_start <= '0';
             	   sig_pause <= '1';
             	   sig_state <= GO;
-            	--elsif sig_stopwatch_cnt = std_logic_vector(sig_train_set) then
-            	   --sig_stopwatch_cnt <= std_logic_vector(sig_break_set);
+            	
             	else
             	   sig_num_reps <= sig_num_reps + 1;
             	   sig_stopwatch_cnt <= std_logic_vector(sig_break_set);
@@ -241,11 +236,13 @@ begin
             end if;
             
           when BREAK =>
-            if sig_set_enable = '1' and sig_stopwatch_cnt = std_logic_vector(sig_break_set) then
+            if sig_set_enable = '1' then 
                 sig_start <= '1';                  -- zacatek odpoctu stopwatch
             	sig_pause <= '0';
             	sig_set_enable <= '0';
-            elsif sig_end = '1' and sig_set_enable = '0' then
+            elsif sig_end = '1' then --and sig_set_enable = '0'
+                sig_stopwatch_cnt <= std_logic_vector(sig_train_set);
+            elsif sig_last_state = TRAIN and sig_set_enable = '0' then
                 sig_stopwatch_cnt <= std_logic_vector(sig_train_set);
             end if;
             	
@@ -256,17 +253,11 @@ begin
                 sig_state <= PAUSE;            -- prechod na pauzu
                 
             elsif (sig_seconds_l = "0000" and sig_seconds_h = "0000" and sig_minutes_l = "0000" and sig_end = '1') then -- konec odpoctu a prechod na TRAIN
-            --elsif sig_end = '1' then
-                --if sig_stopwatch_cnt = std_logic_vector(sig_train_set) then
-            	   --sig_stopwatch_cnt <= std_logic_vector(sig_break_set);
-            	--else
             	   sig_set_enable <= '1';
             	   sig_stopwatch_cnt <= std_logic_vector(sig_train_set);
-            	   --sig_start <= '1';                  -- zacatek odpoctu stopwatch
-            	   --sig_pause <= '0';
             	   sig_last_state <= sig_state;
                    sig_state <= TRAIN;
-                --end if;
+                
             end if;
 
           when PAUSE =>
@@ -278,7 +269,6 @@ begin
 
           when others =>
             sig_state <= GO;
-            sig_cnt   <= (others => '0');
 
         end case;
       end if; 
@@ -303,10 +293,24 @@ begin
         digit_2 <= sig_minutes_l;
         digit_3 <= c_GO;
         
-      when SET =>   -- dodelat zobrazeni nastavovanych hodnot    000000000000000
-        digit_0 <= sig_seconds_l;
-        digit_1 <= sig_seconds_h;
-        digit_2 <= sig_minutes_l;
+      when SET =>   
+        if train_SW = '1' and break_SW /= '1' and reps_SW /= '1' then
+            digit_0 <= "0000";
+            digit_1 <= "0000";
+            digit_2 <= std_logic_vector(sig_train_set);
+        elsif train_SW /= '1' and break_SW = '1' and reps_SW /= '1' then
+            digit_0 <= "0000";
+            digit_1 <= "0000";
+            digit_2 <= std_logic_vector(sig_break_set);
+        elsif train_SW /= '1' and break_SW /= '1' and reps_SW = '1' then
+            digit_0 <= "0000";
+            digit_1 <= "0000";
+            digit_2 <= std_logic_vector(sig_reps_set);
+        else    
+            digit_0 <= "0000";
+            digit_1 <= "0000";
+            digit_2 <= "0000";
+        end if;
         digit_3 <= c_SET;
         
       when TRAIN =>
